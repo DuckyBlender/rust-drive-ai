@@ -26,18 +26,21 @@ struct CarProgressIcon;
 
 impl Plugin for GuiPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_startup_system(setup)
+        app.add_systems(Startup, setup)
             .insert_resource(BrainToDisplay::default())
             .insert_resource(Settings::default())
             .insert_resource(SimStats::default())
-            .add_systems((
-                stats_dialog_system,
-                generation_count_stats_system,
-                max_score_stats_system,
-                num_cars_stats_system,
-                car_progress_system,
-                nn_viz_system,
-            ));
+            .add_systems(
+                Update,
+                (
+                    stats_dialog_system,
+                    generation_count_stats_system,
+                    max_score_stats_system,
+                    num_cars_stats_system,
+                    car_progress_system,
+                    nn_viz_system,
+                ),
+            );
     }
 }
 
@@ -54,7 +57,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn(NodeBundle {
             style: Style {
-                size: Size::width(Val::Percent(100.0)),
+                width: Val::Percent(100.0),
                 justify_content: JustifyContent::SpaceBetween,
                 ..default()
             },
@@ -65,7 +68,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent
                 .spawn(NodeBundle {
                     style: Style {
-                        size: Size::width(Val::Percent(80.0)),
+                        width: Val::Percent(80.0),
                         ..default()
                     },
                     ..default()
@@ -75,7 +78,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     parent.spawn(NodeBundle {
                         style: Style {
                             // size: Size::width(Val::Percent(28.0)),
-                            size: Size::width(Val::Px(415.0)),
+                            width: Val::Px(415.0),
                             ..default()
                         },
                         ..default()
@@ -86,7 +89,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         .spawn(NodeBundle {
                             style: Style {
                                 flex_direction: FlexDirection::Column,
-                                size: Size::width(Val::Percent(3.0)),
+                                width: Val::Percent(3.0),
                                 align_content: AlignContent::SpaceBetween,
                                 justify_content: JustifyContent::SpaceBetween,
                                 ..default()
@@ -99,7 +102,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             parent.spawn(ImageBundle {
                                 image: asset_server.load("flag-top.png").into(),
                                 style: Style {
-                                    size: Size::new(Val::Px(32.0), Val::Px(32.0)),
+                                    width: Val::Px(32.0),
+                                    height: Val::Px(32.0),
                                     margin: UiRect::all(Val::Px(5.0)),
                                     ..default()
                                 },
@@ -109,7 +113,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             parent.spawn(ImageBundle {
                                 image: asset_server.load("flag-bottom.png").into(),
                                 style: Style {
-                                    size: Size::new(Val::Px(32.0), Val::Px(32.0)),
+                                    width: Val::Px(32.0),
+                                    height: Val::Px(32.0),
                                     margin: UiRect::all(Val::Px(5.0)),
                                     ..default()
                                 },
@@ -122,12 +127,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent
                 .spawn(NodeBundle {
                     style: Style {
-                        size: Size::width(Val::Percent(20.0)),
+                        width: Val::Percent(20.0),
                         border: UiRect::all(Val::Px(40.0)),
                         flex_direction: FlexDirection::Column,
                         justify_content: JustifyContent::Start,
                         align_items: AlignItems::Center,
-                        gap: Size::new(Val::Px(8.0), Val::Px(8.0)),
+                        column_gap: Val::Px(8.0),
+                        row_gap: Val::Px(8.0),
                         ..default()
                     },
                     background_color: BackgroundColor(Color::BLACK),
@@ -177,12 +183,9 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             z_index: ZIndex::Global(2),
             style: Style {
                 position_type: PositionType::Absolute,
-                size: Size::height(Val::Px(40.0)),
-                position: UiRect {
-                    bottom: Val::Percent(2.0),
-                    left: Val::Percent(22.3),
-                    ..default()
-                },
+                height: Val::Px(40.0),
+                bottom: Val::Percent(2.0),
+                left: Val::Percent(22.3),
                 align_self: AlignSelf::Center,
                 ..default()
             },
@@ -376,7 +379,7 @@ fn car_progress_system(
     mut q_car_icon: Query<&mut Style, With<CarProgressIcon>>,
 ) {
     let mut style = q_car_icon.single_mut();
-    style.position.bottom = Val::Percent(stats.max_current_score - 3.0);
+    style.bottom = Val::Percent(stats.max_current_score - 3.0);
 }
 
 fn arrow_keys_viz_system(colors: Vec<Color32>) -> Vec<Shape> {

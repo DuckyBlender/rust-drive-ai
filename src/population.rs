@@ -14,8 +14,8 @@ pub struct PopulationPlugin;
 impl Plugin for PopulationPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.insert_resource(MaxDistanceTravelled(0.0))
-            .add_startup_system(setup)
-            .add_systems((population_stats_system, generation_reset_system));
+            .add_systems(Startup, setup)
+            .add_systems(Update, (population_stats_system, generation_reset_system));
     }
 }
 
@@ -102,7 +102,7 @@ fn spawn_cars(
     settings: &mut Settings,
     brains: Option<Vec<Net>>,
 ) {
-    let brains = brains.unwrap_or(Vec::new());
+    let brains = brains.unwrap_or_default();
     let is_new_nn = brains.is_empty() || settings.restart_sim;
     settings.restart_sim = false;
 

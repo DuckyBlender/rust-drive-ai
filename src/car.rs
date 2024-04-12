@@ -62,20 +62,20 @@ pub struct CarBundle {
 
 impl Plugin for CarPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(DebugLinesPlugin::default())
+        app.add_plugins(DebugLinesPlugin::default())
             .register_type::<TurnSpeed>()
             .register_type::<Speed>()
             .insert_resource(RayCastSensors::default())
-            .add_startup_system(setup)
-            .add_systems((
+            .add_systems(Startup, setup)
+            // .add_system(car_manual_input_system)
+            // .add_system(car_gas_system)
+            // .add_system(car_steer_system)
+            .add_systems(Update, (
                 car_nn_controlled_system,
                 collision_events_system,
                 sensors_system,
             ));
 
-        // .add_system(car_manual_input_system)
-        // .add_system(car_gas_system)
-        // .add_system(car_steer_system)
     }
 }
 
@@ -233,36 +233,36 @@ fn update_car_input(
     speed.0 = speed.0.clamp(-MAX_SPEED + MAX_SPEED / 2.0, MAX_SPEED);
 }
 
-// fn car_gas_system(
-//     time: Res<Time>,
-//     mut query: Query<(&Transform, &Speed, &mut Velocity), With<Car>>,
-// ) {
-//     for (transform, speed, mut velocity) in query.iter_mut() {
-//         if speed.0 == 0.0 {
-//             let direction = transform.local_y();
-//             velocity.linvel = vec2(direction.x, direction.y) * 0.0000001;
-//             return;
-//         }
+fn car_gas_system(
+    time: Res<Time>,
+    mut query: Query<(&Transform, &Speed, &mut Velocity), With<Car>>,
+) {
+    for (transform, speed, mut velocity) in query.iter_mut() {
+        if speed.0 == 0.0 {
+            let direction = transform.local_y();
+            velocity.linvel = vec2(direction.x, direction.y) * 0.0000001;
+            return;
+        }
 
-//         let translation_delta = transform.local_y() * speed.0;
-//         velocity.linvel =
-//             vec2(translation_delta.x, translation_delta.y) * 25.0 * time.delta_seconds();
-//     }
-// }
+        let translation_delta = transform.local_y() * speed.0;
+        velocity.linvel =
+            vec2(translation_delta.x, translation_delta.y) * 25.0 * time.delta_seconds();
+    }
+}
 
-// fn car_steer_system(
-//     time: Res<Time>,
-//     mut query: Query<(&Speed, &TurnSpeed, &mut Velocity), With<Car>>,
-// ) {
-//     for (speed, turn_speed, mut velocity) in query.iter_mut() {
-//         if speed.0.abs() < MIN_SPEED_TO_STEER {
-//             velocity.angvel = 0.0;
-//             return;
-//         }
+fn car_steer_system(
+    time: Res<Time>,
+    mut query: Query<(&Speed, &TurnSpeed, &mut Velocity), With<Car>>,
+) {
+    for (speed, turn_speed, mut velocity) in query.iter_mut() {
+        if speed.0.abs() < MIN_SPEED_TO_STEER {
+            velocity.angvel = 0.0;
+            return;
+        }
 
-//         velocity.angvel = turn_speed.0 * time.delta_seconds() * TURN_SPEED;
-//     }
-// }
+        velocity.angvel = turn_speed.0 * time.delta_seconds() * TURN_SPEED;
+    }
+}
 
 fn draw_ray_cast(
     lines: &mut DebugLines,

@@ -39,11 +39,11 @@ impl Net {
         }
     }
 
-    pub fn predict(&self, inputs: &Vec<f64>) -> Vec<Vec<f64>> {
+    pub fn predict(&self, inputs: &[f64]) -> Vec<Vec<f64>> {
         assert!(inputs.len() == self.n_inputs, "Bad input size");
 
         let mut outputs = Vec::new();
-        outputs.push(inputs.clone());
+        outputs.push(inputs.to_owned());
         for (layer_index, layer) in self.layers.iter().enumerate() {
             let layer_results = layer.predict(&outputs[layer_index]);
             outputs.push(layer_results);
